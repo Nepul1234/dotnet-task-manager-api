@@ -8,6 +8,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Add OpenAPI support (lets us test the API in the browser)
 builder.Services.AddOpenApi();
 
+// Allow the frontend (HTML file) to talk to this API
+// Without this, the browser blocks requests from a different origin
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Only show the API docs page when running locally
@@ -15,6 +27,9 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+// Enable CORS (must be before other middleware)
+app.UseCors();
 
 // Redirect http:// to https:// automatically
 app.UseHttpsRedirection();
